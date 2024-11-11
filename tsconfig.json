@@ -5,7 +5,10 @@
 
     "baseUrl": ".",
     "paths": {
-      "~/*": ["*"]
+      "~/*": ["*"],
+      "@utils/*":["./src/utils/*"],
+      "@components/*":["./src/components/*"],
+      "@app/*":["./src/app/*/"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
