@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View, Text, TextInput } from 'react-native';
 
@@ -7,6 +7,7 @@ export default function Home() {
 
   const performSearch = () => {
     console.warn('search', search);
+    router.navigate('/search');
   };
 
   return (
