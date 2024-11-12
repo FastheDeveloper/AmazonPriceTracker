@@ -1,7 +1,7 @@
 import { Link, Redirect, Tabs } from 'expo-router';
 
-import { HeaderButton } from '../../components/HeaderButton';
-import { TabBarIcon } from '../../components/TabBarIcon';
+import { HeaderButton } from '../../../components/HeaderButton';
+import { TabBarIcon } from '../../../components/TabBarIcon';
 import { useAuth } from '~/src/Context/AuthContext';
 
 export default function TabLayout() {

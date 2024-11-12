@@ -14,9 +14,9 @@ export default function RootLayout() {
   return (
     <AuthContextProvider>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)/(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="modal"
+          name="(app)/modal"
           options={{ headerShown: false, animation: 'slide_from_bottom' }}
         />
       </Stack>

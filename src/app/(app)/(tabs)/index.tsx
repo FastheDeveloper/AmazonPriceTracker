@@ -27,10 +27,7 @@ export default function Home() {
       </View>
 
       <Link href={'/(auth)/Login'}>Open Auth</Link>
-
-      <TouchableOpacity onPress={() => supabase.auth.signOut()}>
-        <Text>Sign out</Text>
-      </TouchableOpacity>
+      <Text onPress={() => supabase.auth.signOut()}>Sign out</Text>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { AuthSession, Session } from '@supabase/supabase-js';
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 interface AuthContextType {
   session: Session | null;
   user: Session['user'] | null;
@@ -27,7 +27,7 @@ export default function AuthContextProvider({ children }: PropsWithChildren) {
   }, []);
 
   if (!isReady) {
-    return <View className="flex-1 bg-red-700" />;
+    return <ActivityIndicator />;
   }
   return (
     // <AuthContext.Provider value={{ session:null, user:null || null }}>
