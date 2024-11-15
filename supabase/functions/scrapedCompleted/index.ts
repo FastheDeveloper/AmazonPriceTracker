@@ -4,65 +4,110 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+
+//@ts-ignore
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 console.log('Hello from Functions!');
 
-Deno.serve(async (req) => {
-  const url = new URL(req.url);
-  const id = url.searchParams.get('id');
-
-  const reqJson = await req.json();
-
-  const authHeader = req.headers.get('Authorization')!;
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    {
-      global: { headers: { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` } },
+//@ts-ignore
+Deno.serve(async (req:Request) => {
+  try {
+    // Validate request parameters
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id');
+    if (!id) {
+      throw new Error('Search ID is required');
     }
-  );
 
-  const updated_at = new Date().toISOString();
-  //save all products
-  const products = reqJson.map((p) => ({
-    asin: p.asin,
-    updated_at,
-    name: p.name,
-    image: p.image,
-    url: p.url,
-    final_price: p.final_price,
-    currency: p.currency,
-  }));
+    // Validate request body
+    const reqJson = await req.json().catch(() => {
+      throw new Error('Invalid JSON payload');
+    });
 
-  const { error: productsError } = await supabase.from('products').upsert(products);
-  console.log('=================productsError===================');
-  console.log(productsError);
-  console.log('===============productsError=====================');
-  //Link producxts with search Ids
-  const productsSearchLink = products.map((p) => ({
-    asin: p.asin,
-    search_id: id,
-  }));
+    if (!Array.isArray(reqJson)) {
+      throw new Error('Payload must be an array of products');
+    }
 
-  //might insert extra links when a product is updated and not new
-  const { error: product_searchError } = await supabase
-    .from('product_search')
-    .upsert(productsSearchLink);
-  console.log('=================product_searchError===================');
-  console.log(product_searchError);
-  console.log('===============product_searchError=====================');
-  //update search status
-  await supabase
-    .from('searches')
-    .update({ status: 'Completed', last_scraped_at: updated_at })
-    .eq('id', id);
+    // Validate auth header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
 
-  const data = {
-    message: `Hellofas!`,
-  };
 
-  return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+    // Initialize Supabase client
+    //@ts-ignore
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    //@ts-ignore
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing required environment variables');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${supabaseKey}` } },
+    });
+
+    const updated_at = new Date().toISOString();
+    
+    // Process products
+    const products = reqJson.map((p) => ({
+      asin: p.asin,
+      updated_at,
+      name: p.name,
+      image: p.image,
+      url: p.url,
+      final_price: p.final_price,
+      currency: p.currency,
+    }));
+
+    // Perform database operations
+    const { error: productsError } = await supabase.from('products').upsert(products);
+    if (productsError) {
+      throw new Error(`Failed to upsert products: ${productsError.message}`);
+    }
+
+    const productsSearchLink = products.map((p) => ({
+      asin: p.asin,
+      search_id: id,
+    }));
+
+    const { error: product_searchError } = await supabase
+      .from('product_search')
+      .upsert(productsSearchLink);
+    if (product_searchError) {
+      throw new Error(`Failed to upsert product_search: ${product_searchError.message}`);
+    }
+
+    const { error: searchError } = await supabase
+      .from('searches')
+      .update({ status: 'Completed', last_scraped_at: updated_at })
+      .eq('id', id);
+    if (searchError) {
+      throw new Error(`Failed to update search status: ${searchError.message}`);
+    }
+
+    return new Response(
+      JSON.stringify({ message: 'Processing completed successfully' }), 
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      }
+    );
+
+  } catch (error) {
+    console.error('Error processing request:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'An unexpected error occurred'
+      }), 
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        status: 400
+      }
+    );
+  }
 });
 
 /* To invoke locally:
