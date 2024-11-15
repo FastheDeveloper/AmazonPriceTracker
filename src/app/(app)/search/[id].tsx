@@ -33,10 +33,12 @@ type ProductSearchJoin = {
     sold: number;
     rating: number;
     num_ratings: number;
-    variations?: {
-      asin: string;
-      name: string;
-    }[] | null;
+    variations?:
+      | {
+          asin: string;
+          name: string;
+        }[]
+      | null;
     badge: string | null;
     business_type: string | null;
     brand: string | null;
@@ -53,20 +55,43 @@ type ProductSearchJoin = {
   // ... any other fields from product_search table
 };
 
+type SearchRecordUpdated = {
+  created_at: string;
+  id: number;
+  is_tracked: boolean;
+  last_scraped_at: string | null;
+  query: string;
+  snapshot_id: string | null;
+  status: string;
+  user_id: string;
+};
+
+type UpdateEvent = {
+  commit_timestamp: string;
+  errors: string | null;
+  eventType: 'UPDATE' | 'INSERT' | 'DELETE';
+  new: SearchRecordUpdated;
+  old: Partial<SearchRecordUpdated>;
+  schema: string;
+  table: string;
+};
+
 const SearchResultScreen = () => {
   // const products = dummyproducts.slice(1, 21);
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [search, setSearch] = useState<SearchRecord>();
   const [products, setProducts] = useState<ProductSearchJoin['products'][]>([]);
 
-  useEffect(() => {
+  const supabaseQuerySearches = () => {
     supabase
       .from('searches')
       .select('*')
       .eq('id', id)
       .single()
       .then(({ data }) => setSearch(data));
+  };
 
+  const supabaseQueryProducts = () => {
     supabase
       .from('product_search')
       .select('*, products(*)')
@@ -75,11 +100,7 @@ const SearchResultScreen = () => {
         console.log(JSON.stringify(data, null, 2), error);
         setProducts(data?.map((d) => d.products) || []);
       });
-  }, [id]);
-
-  if (!search) {
-    return <ActivityIndicator />;
-  }
+  };
 
   const startScraping = async () => {
     // const {data,error}= await supabase.from('searches')
@@ -97,7 +118,38 @@ const SearchResultScreen = () => {
     console.log(error);
   };
 
-  
+  const handleUpdates = (payload) => {
+    // supabaseQuerySearchesANDProducts()
+    if (payload.new?.id === parseInt(id)) {
+      setSearch(payload.new);
+      supabaseQueryProducts();
+    }
+    console.log('Change received!', JSON.stringify(payload, null, 2));
+  };
+
+  useEffect(() => {
+    supabaseQuerySearches();
+    supabaseQueryProducts();
+  }, [id]);
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel('supabase_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'searches' },
+        handleUpdates
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  if (!search) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <View>
       <View className="m-2 gap-2 rounded bg-white p-2 shadow-sm">
@@ -115,7 +167,7 @@ const SearchResultScreen = () => {
           <Pressable
             onPress={() => Linking.openURL(item.url)}
             className="flex-row gap-2 bg-white p-3">
-            <Image source={{ uri: item.image }} className="h-20  w-20" />
+            <Image source={{ uri: item.image }} className="cover  h-20 w-20" />
             <Text className="flex-1" numberOfLines={4}>
               {item.name}
             </Text>
