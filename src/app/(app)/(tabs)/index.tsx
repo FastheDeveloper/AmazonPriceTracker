@@ -79,10 +79,12 @@ export default function Home() {
         refreshing={false}
         contentContainerClassName="p-3 gap-2 "
         renderItem={({ item }) => (
-          <View className="border-b border-gray-400 pb-2">
-            <Text className="font-semibold">{item?.query}</Text>
-            <Text className="text-xl font-semibold">{dayjs(item?.created_at).fromNow()}</Text>
-          </View>
+          <Link href={`/search/${item.id}`} asChild>
+            <Pressable className="border-b border-gray-400 pb-2">
+              <Text className="font-semibold">{item?.query}</Text>
+              <Text className="text-xl font-semibold">{dayjs(item?.created_at).fromNow()}</Text>
+            </Pressable>
+          </Link>
         )}
       />
       <Link href={'/(auth)/Login'}>Open Auth</Link>

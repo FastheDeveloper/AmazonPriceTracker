@@ -7,6 +7,7 @@ import { supabase } from '~/src/utils/supabase';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Button } from '~/src/components/Button';
 dayjs.extend(relativeTime);
 
 type SearchRecord = {
@@ -20,9 +21,10 @@ type SearchRecord = {
   user_id: string; // UUID of the user
 };
 const SearchResultScreen = () => {
-  const products = dummyproducts.slice(1, 21);
+  // const products = dummyproducts.slice(1, 21);
   const { id } = useLocalSearchParams();
   const [search, setSearch] = useState<SearchRecord>();
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     supabase
@@ -31,17 +33,44 @@ const SearchResultScreen = () => {
       .eq('id', id)
       .single()
       .then(({ data }) => setSearch(data));
+
+    supabase
+      .from('product_search')
+      .select('*, products(*)')
+      .eq('search_id', id)
+      .then(({ data, error }) => {
+        console.log(JSON.stringify(data, null, 2), error);
+        setProducts(data?.map((d) => d.products));
+      });
   }, [id]);
 
   if (!search) {
     return <ActivityIndicator />;
   }
+
+  const startScraping = async () => {
+    // const {data,error}= await supabase.from('searches')
+    // .update({"snapshot_id":'',"status":"Scraped"})
+    // .eq("id",id)
+    // .select()
+    // .
+    console.log(search, ' search');
+    const { data, error } = await supabase.functions.invoke('scrapeStarted', {
+      body: JSON.stringify({ record: search }),
+    });
+    console.log('===============data=====================');
+    console.log(data);
+    console.log('=================error===================');
+    console.log(error);
+  };
   return (
     <View>
       <View className="m-2 gap-2 rounded bg-white p-2 shadow-sm">
         <Text className="text-xl font-semibold">{search.query}</Text>
         <Text className="text-xl font-semibold">{dayjs(search.created_at).fromNow()}</Text>
         <Text className="text-xl font-semibold">{search.status}</Text>
+
+        <Button title="Start scraping" onPressOut={startScraping} />
       </View>
       <FlatList
         data={products}
