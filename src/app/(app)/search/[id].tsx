@@ -20,11 +20,44 @@ type SearchRecord = {
   status: string; // status of the query
   user_id: string; // UUID of the user
 };
+
+type ProductSearchJoin = {
+  products: {
+    asin: string;
+    url: string;
+    name: string;
+    sponsored: string;
+    initial_price: number;
+    final_price: number;
+    currency: string;
+    sold: number;
+    rating: number;
+    num_ratings: number;
+    variations?: {
+      asin: string;
+      name: string;
+    }[] | null;
+    badge: string | null;
+    business_type: string | null;
+    brand: string | null;
+    delivery: string[];
+    keyword: string;
+    image: string;
+    domain: string;
+    bought_past_month: number;
+    page_number: number;
+    rank_on_page: number;
+  };
+  search_id: number;
+  product_id: string;
+  // ... any other fields from product_search table
+};
+
 const SearchResultScreen = () => {
   // const products = dummyproducts.slice(1, 21);
   const { id } = useLocalSearchParams();
   const [search, setSearch] = useState<SearchRecord>();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<ProductSearchJoin['products'][]>([]);
 
   useEffect(() => {
     supabase
@@ -40,7 +73,7 @@ const SearchResultScreen = () => {
       .eq('search_id', id)
       .then(({ data, error }) => {
         console.log(JSON.stringify(data, null, 2), error);
-        setProducts(data?.map((d) => d.products));
+        setProducts(data?.map((d) => d.products) || []);
       });
   }, [id]);
 
@@ -63,6 +96,8 @@ const SearchResultScreen = () => {
     console.log('=================error===================');
     console.log(error);
   };
+
+  
   return (
     <View>
       <View className="m-2 gap-2 rounded bg-white p-2 shadow-sm">
