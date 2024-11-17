@@ -8,6 +8,7 @@ import { supabase } from '~/src/utils/supabase';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Button } from '~/src/components/Button';
+import { Tables } from '~/types/supabase';
 dayjs.extend(relativeTime);
 
 type SearchRecord = {
@@ -79,8 +80,8 @@ type UpdateEvent = {
 const SearchResultScreen = () => {
   // const products = dummyproducts.slice(1, 21);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [search, setSearch] = useState<SearchRecord>();
-  const [products, setProducts] = useState<ProductSearchJoin['products'][]>([]);
+  const [search, setSearch] = useState<Tables<'searches'> | null>(null);
+  const [products, setProducts] = useState<Tables<'products'>[]>([]);
 
   const supabaseQuerySearches = () => {
     supabase
@@ -98,7 +99,7 @@ const SearchResultScreen = () => {
       .eq('search_id', id)
       .then(({ data, error }) => {
         console.log(JSON.stringify(data, null, 2), error);
-        setProducts(data?.map((d) => d.products) || []);
+        setProducts(data?.map((d) => d.products).filter((p) => !!p) as [Tables<'products'>]);
       });
   };
 
@@ -118,7 +119,7 @@ const SearchResultScreen = () => {
     console.log(error);
   };
 
-  const handleUpdates = (payload) => {
+  const handleUpdates = (payload: any) => {
     // supabaseQuerySearchesANDProducts()
     if (payload.new?.id === parseInt(id)) {
       setSearch(payload.new);
@@ -162,12 +163,15 @@ const SearchResultScreen = () => {
       <FlatList
         data={products}
         contentContainerClassName="gap-3 p-3 "
-        keyExtractor={(item) => item.asin}
+        keyExtractor={(item) => `${item.asin}`}
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => Linking.openURL(item.url)}
+            onPress={() => !!item.url && Linking.openURL(item.url)}
             className="flex-row gap-2 bg-white p-3">
-            <Image source={{ uri: item.image }} className="cover  h-20 w-20" />
+            <Image
+              source={item.image ? { uri: item.image } : undefined}
+              className="cover  h-20 w-20"
+            />
             <Text className="flex-1" numberOfLines={4}>
               {item.name}
             </Text>

@@ -14,11 +14,11 @@ const startScraping = async (keyword: string, search_id: string) => {
     throw new Error('Keyword and search_id are required');
   }
 
-  //@ts-ignore  
+  //@ts-ignore
   const brightDataApiKey = Deno.env.get('BRIGHT_DATA_API_KEY');
   //@ts-ignore
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-  
+
   if (!brightDataApiKey || !supabaseAnonKey) {
     throw new Error('Missing required environment variables');
   }
@@ -52,7 +52,9 @@ const startScraping = async (keyword: string, search_id: string) => {
     const resultJson = await res.json();
     return resultJson;
   } catch (error) {
-    throw new Error(`Failed to start scraping: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to start scraping: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 };
 
@@ -86,18 +88,16 @@ Deno.serve(async (req: Request) => {
       throw new Error('Missing Supabase environment variables');
     }
 
-    const supabaseClient = createClient(
-      supabaseUrl,
-      supabaseKey,
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    );
+    const supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization')! } },
+    });
 
     // Update database
     const { data, error: dbError } = await supabaseClient
       .from('searches')
-      .update({ 
-        snapshot_id: newScrapJob.snapshot_id, 
-        status: 'Scraping' 
+      .update({
+        snapshot_id: newScrapJob.snapshot_id,
+        status: 'Scraping',
       })
       .eq('id', body.record.id)
       .select()
@@ -107,24 +107,20 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Database error: ${dbError.message}`);
     }
 
-    return new Response(
-      JSON.stringify({ success: true, data }), 
-      { 
-        headers: { 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    );
-
+    return new Response(JSON.stringify({ success: true, data }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    });
   } catch (error) {
     console.error('Error in scrapeStarted:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An unexpected error occurred'
-      }), 
-      { 
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      }),
+      {
         headers: { 'Content-Type': 'application/json' },
-        status: 400 
+        status: 400,
       }
     );
   }

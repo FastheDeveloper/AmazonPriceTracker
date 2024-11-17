@@ -19,6 +19,10 @@ export default function RootLayout() {
           name="(app)/modal"
           options={{ headerShown: false, animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen
+          name="(app)/search/[id]"
+          options={{ title: 'Search Result', headerBackTitleVisible: false }}
+        />
       </Stack>
     </AuthContextProvider>
   );
