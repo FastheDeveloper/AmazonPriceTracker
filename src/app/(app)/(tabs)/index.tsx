@@ -5,6 +5,7 @@ import { useAuth } from '~/src/Context/AuthContext';
 import { supabase } from '~/src/utils/supabase';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Tables } from '~/types/supabase';
 dayjs.extend(relativeTime);
 type History = {
   created_at: string; // ISO date string
@@ -22,7 +23,7 @@ type Historys = History[];
 export default function Home() {
   const [search, setSearch] = useState<string>('');
   const { user } = useAuth();
-  const [history, setHistory] = useState<Historys>([]);
+  const [history, setHistory] = useState<Tables<'searches'>[]>([]);
   const performSearch = async () => {
     console.warn('search', search);
 
@@ -46,12 +47,13 @@ export default function Home() {
   };
   const fetchHistory = () => {
     // query from database with this comand
-    supabase
-      .from('searches')
-      .select('*')
-      .eq('user_id', user?.id)
-      .order('created_at', { ascending: false }) //order parameter
-      .then(({ data }) => setHistory(data as Historys)); //take everything from 'Searches' table where the user_id matches the user.id from client side, then set the data recieved into setHistory state
+    if (user)
+      supabase
+        .from('searches')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false }) //order parameter
+        .then(({ data }) => setHistory(data || [])); //take everything from 'Searches' table where the user_id matches the user.id from client side, then set the data recieved into setHistory state
   };
   useEffect(() => {
     fetchHistory();
