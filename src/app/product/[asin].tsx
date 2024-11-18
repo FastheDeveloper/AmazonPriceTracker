@@ -5,6 +5,7 @@ import { Pressable, Text } from 'react-native';
 import { supabase } from '~/src/utils/supabase';
 import { Tables } from '~/types/supabase';
 import dayjs from 'dayjs';
+import { Button } from '~/src/components/Button';
 
 export default function ProductDetailsScreen() {
   const [products, setProducts] = useState<Tables<'products'> | null>(null);
@@ -68,6 +69,12 @@ export default function ProductDetailsScreen() {
                 <Text>${products.final_price.toFixed(2)}</Text>
               </Pressable>
             </View>
+            {products.url && (
+              <Button
+                title="Open in amazon "
+                onPress={() => !!products.url && Linking.openURL(products.url)}
+              />
+            )}
             <Text className="mt-4 p-2 font-semibold">Price History</Text>
           </View>
         }
