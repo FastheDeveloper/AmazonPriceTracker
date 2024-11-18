@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Button } from '~/src/components/Button';
 import { Tables } from '~/types/supabase';
+import { Octicons } from '@expo/vector-icons';
 dayjs.extend(relativeTime);
 
 type SearchRecord = {
@@ -98,7 +99,7 @@ const SearchResultScreen = () => {
       .select('*, products(*)')
       .eq('search_id', id)
       .then(({ data, error }) => {
-        console.log(JSON.stringify(data, null, 2), error);
+        console.log(JSON.stringify(data, null, 2));
         setProducts(data?.map((d) => d.products).filter((p) => !!p) as [Tables<'products'>]);
       });
   };
@@ -109,14 +110,10 @@ const SearchResultScreen = () => {
     // .eq("id",id)
     // .select()
     // .
-    console.log(search, ' search');
+
     const { data, error } = await supabase.functions.invoke('scrapeStarted', {
       body: JSON.stringify({ record: search }),
     });
-    console.log('===============data=====================');
-    console.log(data);
-    console.log('=================error===================');
-    console.log(error);
   };
 
   const handleUpdates = (payload: any) => {
@@ -147,18 +144,42 @@ const SearchResultScreen = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const trackProducts = async () => {
+    if (!search?.id) {
+      return;
+    }
+    const { data, error } = await supabase
+      .from('searches')
+      .update({ is_tracked: !search?.is_tracked })
+      .eq('id', search?.id)
+      .select()
+      .single();
+    console.log(data, '[      ]', error);
+  };
+
   if (!search) {
     return <ActivityIndicator />;
   }
 
   return (
     <View>
-      <View className="m-2 gap-2 rounded bg-white p-2 shadow-sm">
-        <Text className="text-xl font-semibold">{search.query}</Text>
-        <Text className="text-xl font-semibold">{dayjs(search.created_at).fromNow()}</Text>
-        <Text className="text-xl font-semibold">{search.status}</Text>
-
-        <Button title="Start scraping" onPressOut={startScraping} />
+      <View className="fle m-2 flex-row items-center justify-between gap-2 rounded bg-white p-2 shadow-sm">
+        <View>
+          <Text className="text-xl font-semibold">{search.query}</Text>
+          <Text className="text-xl font-semibold">{dayjs(search.created_at).fromNow()}</Text>
+          <Text className="text-xl font-semibold">{search.status}</Text>
+        </View>
+        <View className="items-end gap-4">
+          <Octicons
+            onPress={trackProducts}
+            name={search.is_tracked ? 'bell-fill' : 'bell'}
+            size={24}
+            color={'gold'}
+            className="mr-8"
+          />
+          <Button title="Start scraping" onPressOut={startScraping} />
+        </View>
       </View>
       <FlatList
         data={products}
