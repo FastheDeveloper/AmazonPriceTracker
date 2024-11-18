@@ -6,6 +6,9 @@ import { supabase } from '~/src/utils/supabase';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Tables } from '~/types/supabase';
+import { Octicons } from '@expo/vector-icons';
+import SearchListItem from '~/src/components/SearchListItem';
+
 dayjs.extend(relativeTime);
 type History = {
   created_at: string; // ISO date string
@@ -80,14 +83,7 @@ export default function Home() {
         onRefresh={fetchHistory}
         refreshing={false}
         contentContainerClassName="p-3 gap-2 "
-        renderItem={({ item }) => (
-          <Link href={`/search/${item.id}`} asChild>
-            <Pressable className="border-b border-gray-400 pb-2">
-              <Text className="font-semibold">{item?.query}</Text>
-              <Text className="text-xl font-semibold">{dayjs(item?.created_at).fromNow()}</Text>
-            </Pressable>
-          </Link>
-        )}
+        renderItem={({ item }) => <SearchListItem search={item} />}
       />
       <Link href={'/(auth)/Login'}>Open Auth</Link>
       <Text onPress={() => supabase.auth.signOut()}>Sign out</Text>
