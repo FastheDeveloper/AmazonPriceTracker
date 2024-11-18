@@ -36,22 +36,16 @@ export type Database = {
     Tables: {
       product_search: {
         Row: {
-          asin: string | null
-          created_at: string
-          id: number
-          search_id: number | null
+          asin: string
+          search_id: number
         }
         Insert: {
-          asin?: string | null
-          created_at?: string
-          id?: number
-          search_id?: number | null
+          asin: string
+          search_id: number
         }
         Update: {
-          asin?: string | null
-          created_at?: string
-          id?: number
-          search_id?: number | null
+          asin?: string
+          search_id?: number
         }
         Relationships: [
           {
@@ -102,6 +96,35 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      products_history: {
+        Row: {
+          asin: string
+          created_at: string
+          final_price: number
+          id: number
+        }
+        Insert: {
+          asin: string
+          created_at?: string
+          final_price: number
+          id?: number
+        }
+        Update: {
+          asin?: string
+          created_at?: string
+          final_price?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_history_asin_fkey"
+            columns: ["asin"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["asin"]
+          },
+        ]
       }
       searches: {
         Row: {

@@ -2,7 +2,7 @@ import { ActivityIndicator, FlatList, Image, Linking, Pressable, Text, View } fr
 import React, { useEffect, useState } from 'react';
 
 import dummyproducts from '@data/amazon.json';
-import { useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '~/src/utils/supabase';
 
 import dayjs from 'dayjs';
@@ -165,18 +165,21 @@ const SearchResultScreen = () => {
         contentContainerClassName="gap-3 p-3 "
         keyExtractor={(item) => `${item.asin}`}
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => !!item.url && Linking.openURL(item.url)}
-            className="flex-row gap-2 bg-white p-3">
-            <Image
-              source={item.image ? { uri: item.image } : undefined}
-              className="cover  h-20 w-20"
-            />
-            <Text className="flex-1" numberOfLines={4}>
-              {item.name}
-            </Text>
-            <Text>${item.final_price.toFixed(2)}</Text>
-          </Pressable>
+          <Link href={`/product/${item.asin}`} asChild>
+            <Pressable
+              // onPress={() => !!item.url && Linking.openURL(item.url)}
+
+              className="flex-row gap-2 bg-white p-3">
+              <Image
+                source={item.image ? { uri: item.image } : undefined}
+                className="cover  h-20 w-20"
+              />
+              <Text className="flex-1" numberOfLines={4}>
+                {item.name}
+              </Text>
+              <Text>${item.final_price.toFixed(2)}</Text>
+            </Pressable>
+          </Link>
         )}
       />
     </View>
