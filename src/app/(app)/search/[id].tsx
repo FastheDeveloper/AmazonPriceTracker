@@ -167,7 +167,7 @@ const SearchResultScreen = () => {
       <View className="fle m-2 flex-row items-center justify-between gap-2 rounded bg-white p-2 shadow-sm">
         <View>
           <Text className="text-xl font-semibold">{search.query}</Text>
-          <Text className="text-xl font-semibold">{dayjs(search.created_at).fromNow()}</Text>
+          <Text className="text-xl font-semibold">{dayjs(search.last_scraped_at).fromNow()}</Text>
           <Text className="text-xl font-semibold">{search.status}</Text>
         </View>
         <View className="items-end gap-4">

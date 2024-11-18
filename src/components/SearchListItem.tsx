@@ -14,7 +14,9 @@ const SearchListItem = ({ search }: { search: Tables<'searches'> }) => {
       <Pressable className="flex-row items-center justify-between border-b border-gray-400 pb-2">
         <View>
           <Text className="font-semibold">{search?.query}</Text>
-          <Text className="text-xl font-semibold">{dayjs(search?.created_at).fromNow()}</Text>
+          <Text className="text-xl font-semibold">
+            Scraped {dayjs(search?.last_scraped_at).fromNow()}
+          </Text>
         </View>
         <Octicons name={search.is_tracked ? 'bell-fill' : 'bell'} size={24} color={'gold'} />
       </Pressable>
