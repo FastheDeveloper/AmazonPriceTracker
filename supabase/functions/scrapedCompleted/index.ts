@@ -11,7 +11,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 console.log('Hello from Functions!');
 
 //@ts-ignore
-Deno.serve(async (req:Request) => {
+Deno.serve(async (req: Request) => {
   try {
     // Validate request parameters
     const url = new URL(req.url);
@@ -35,7 +35,6 @@ Deno.serve(async (req:Request) => {
       throw new Error('Authorization header is required');
     }
 
-
     // Initialize Supabase client
     //@ts-ignore
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -50,8 +49,8 @@ Deno.serve(async (req:Request) => {
     });
 
     const updated_at = new Date().toISOString();
-    
-    // Process products
+
+    // save all products
     const products = reqJson.map((p) => ({
       asin: p.asin,
       updated_at,
@@ -62,12 +61,27 @@ Deno.serve(async (req:Request) => {
       currency: p.currency,
     }));
 
-    // Perform database operations
+    // insert or update item in the database
     const { error: productsError } = await supabase.from('products').upsert(products);
     if (productsError) {
       throw new Error(`Failed to upsert products: ${productsError.message}`);
     }
 
+    //save products snapshot to product_history table
+    const products_history = reqJson.map((p) => ({
+      asin: p.asin,
+      final_price: p.final_price,
+    }));
+
+    // this inserts all, not upsert which updates if it available
+    const { error: ProductHistoryError } = await supabase
+      .from('products_history')
+      .insert(products_history);
+    if (ProductHistoryError) {
+      throw new Error(`Failed to upsert product_history: ${ProductHistoryError.message}`);
+    }
+
+    //link products with search_ids
     const productsSearchLink = products.map((p) => ({
       asin: p.asin,
       search_id: id,
@@ -88,23 +102,19 @@ Deno.serve(async (req:Request) => {
       throw new Error(`Failed to update search status: ${searchError.message}`);
     }
 
-    return new Response(
-      JSON.stringify({ message: 'Processing completed successfully' }), 
-      { 
-        headers: { 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
-
+    return new Response(JSON.stringify({ message: 'Processing completed successfully' }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    });
   } catch (error) {
     console.error('Error processing request:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'An unexpected error occurred'
-      }), 
-      { 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      }),
+      {
         headers: { 'Content-Type': 'application/json' },
-        status: 400
+        status: 400,
       }
     );
   }
