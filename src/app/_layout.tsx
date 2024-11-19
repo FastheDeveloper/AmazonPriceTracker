@@ -11,12 +11,13 @@ import AuthContextProvider from '../Context/AuthContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { FONT_NAMES } from '../core/constants/fontConstants';
+import Toast, { BaseToast, BaseToastProps, ErrorToast } from 'react-native-toast-message';
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 const LottieAnimation = ({
   setAnimationPlayed,
@@ -50,10 +51,30 @@ export default function RootLayout() {
   });
   const [animationPlayed, setAnimationPlayed] = useState(false);
 
-  if (!animationPlayed && !!fontsLoaded) {
-    SplashScreen.hideAsync();
-    return <LottieAnimation setAnimationPlayed={setAnimationPlayed} />;
-  }
+  // if (!animationPlayed && !!fontsLoaded) {
+  //   SplashScreen.hideAsync();
+  //   return <LottieAnimation setAnimationPlayed={setAnimationPlayed} />;
+  // }
+  const toastConfig = {
+    success: (props: React.JSX.IntrinsicAttributes & BaseToastProps) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: '#28a745', backgroundColor: '#333' }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}
+        text2Style={{ fontSize: 14, color: '#ddd' }}
+      />
+    ),
+    error: (props: React.JSX.IntrinsicAttributes & BaseToastProps) => (
+      <ErrorToast
+        {...props}
+        style={{ borderLeftColor: '#dc3545', backgroundColor: '#333' }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{ fontSize: 16, fontWeight: 'bold', color: '#fff' }}
+        text2Style={{ fontSize: 14, color: '#ddd' }}
+      />
+    ),
+  };
 
   return (
     <SafeAreaProvider>
@@ -70,6 +91,7 @@ export default function RootLayout() {
               options={{ title: 'Search Result', headerBackTitleVisible: false }}
             />
           </Stack>
+          <Toast config={toastConfig} />
         </AuthContextProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>

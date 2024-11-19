@@ -31,15 +31,6 @@ export default function AuthContextProvider({ children }: PropsWithChildren) {
   const [hasBeenUsed, setHasBeenUsed] = useState(false);
 
   const [isReady, setIsReady] = useState(false);
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsReady(true);
-    });
-    supabase.auth.onAuthStateChange((_evemt, session) => {
-      setSession(session);
-    });
-  }, []);
   const checkBeenUsed = useCallback(async () => {
     console.log('checking');
     try {
@@ -50,9 +41,22 @@ export default function AuthContextProvider({ children }: PropsWithChildren) {
       console.log('done');
     }
   }, []);
+
+  useEffect(() => {
+    console.log('runnings');
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsReady(true);
+    });
+    supabase.auth.onAuthStateChange((_evemt, session) => {
+      setSession(session);
+    });
+  }, []);
+
   useEffect(() => {
     checkBeenUsed();
   }, [checkBeenUsed]);
+
   if (!isReady) {
     return <ActivityIndicator />;
   }
