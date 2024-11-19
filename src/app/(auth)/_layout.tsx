@@ -4,7 +4,10 @@ import { Redirect, Slot } from 'expo-router';
 import { useAuth } from '~/src/Context/AuthContext';
 
 const AuthLayout = () => {
-  const { user } = useAuth();
+  const { user, hasBeenUsed } = useAuth();
+  // if (hasBeenUsed) {
+  //   return <Redirect href={'/(auth)/Signup'} />;
+  // }
   if (user) {
     return <Redirect href="/" />;
   }

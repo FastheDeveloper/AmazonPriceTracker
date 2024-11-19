@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, Linking, View } from 'react-native';
 import { Pressable, Text } from 'react-native';
@@ -47,6 +47,7 @@ export default function ProductDetailsScreen() {
 
   return (
     <>
+      <Stack.Screen options={{ headerTitle: 'Product History', headerBackTitleVisible: false }} />
       <FlatList
         data={productHistory}
         keyExtractor={(item) => item.asin + item.created_at + item.id}

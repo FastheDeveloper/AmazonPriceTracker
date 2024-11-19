@@ -5,7 +5,11 @@ import { TabBarIcon } from '../../../components/TabBarIcon';
 import { useAuth } from '~/src/Context/AuthContext';
 
 export default function TabLayout() {
-  const { user } = useAuth();
+  const { user, hasBeenUsed } = useAuth();
+
+  if (!hasBeenUsed) {
+    return <Redirect href={'/(auth)/Onboarding'} />;
+  }
 
   if (!user) {
     return <Redirect href="/(auth)/Login" />;
@@ -14,6 +18,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: 'black',
+        // headerShown: false,
       }}>
       <Tabs.Screen
         name="index"
