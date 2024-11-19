@@ -1,6 +1,6 @@
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Image, Linking, View } from 'react-native';
+import { FlatList, Image, ImageBackground, Linking, View } from 'react-native';
 import { Pressable, Text } from 'react-native';
 import { supabase } from '~/src/utils/supabase';
 import { Tables } from '~/types/supabase';
@@ -46,7 +46,10 @@ export default function ProductDetailsScreen() {
   }
 
   return (
-    <>
+    <ImageBackground
+      source={require('src/assets/images/homeBg.png')}
+      resizeMode="cover"
+      className="flex-1 px-4 pt-24">
       <Stack.Screen options={{ headerTitle: 'Product History', headerBackTitleVisible: false }} />
       <FlatList
         data={productHistory}
@@ -86,6 +89,6 @@ export default function ProductDetailsScreen() {
           </View>
         )}
       />
-    </>
+    </ImageBackground>
   );
 }

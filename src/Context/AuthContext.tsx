@@ -57,9 +57,9 @@ export default function AuthContextProvider({ children }: PropsWithChildren) {
     checkBeenUsed();
   }, [checkBeenUsed]);
 
-  if (!isReady) {
-    return <ActivityIndicator />;
-  }
+  // if (!isReady) {
+  //   return <ActivityIndicator />;
+  // }
   return (
     // <AuthContext.Provider value={{ session:null, user:null || null }}>
     <AuthContext.Provider

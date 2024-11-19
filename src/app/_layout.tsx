@@ -17,7 +17,7 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 const LottieAnimation = ({
   setAnimationPlayed,
@@ -51,10 +51,10 @@ export default function RootLayout() {
   });
   const [animationPlayed, setAnimationPlayed] = useState(false);
 
-  // if (!animationPlayed && !!fontsLoaded) {
-  //   SplashScreen.hideAsync();
-  //   return <LottieAnimation setAnimationPlayed={setAnimationPlayed} />;
-  // }
+  if (!animationPlayed && !!fontsLoaded) {
+    SplashScreen.hideAsync();
+    return <LottieAnimation setAnimationPlayed={setAnimationPlayed} />;
+  }
   const toastConfig = {
     success: (props: React.JSX.IntrinsicAttributes & BaseToastProps) => (
       <BaseToast
