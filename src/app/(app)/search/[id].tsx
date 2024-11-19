@@ -1,4 +1,13 @@
-import { ActivityIndicator, FlatList, Image, Linking, Pressable, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ImageBackground,
+  Linking,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 import dummyproducts from '@data/amazon.json';
@@ -10,6 +19,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { Button } from '~/src/components/Button';
 import { Tables } from '~/types/supabase';
 import { Octicons } from '@expo/vector-icons';
+import AppButton from '~/src/components/components/AppButton';
+import { APP_COLOR } from '~/src/core/constants/colorConstants';
 dayjs.extend(relativeTime);
 
 type SearchRecord = {
@@ -163,8 +174,12 @@ const SearchResultScreen = () => {
   }
 
   return (
-    <View>
-      <View className="fle m-2 flex-row items-center justify-between gap-2 rounded bg-white p-2 shadow-sm">
+    // <View className="bg-white pt-14">
+    <ImageBackground
+      source={require('src/assets/images/homeBg.png')}
+      resizeMode="cover"
+      className="flex-1 pt-14">
+      <View className="m-2 mb-4 flex flex-row items-center justify-between gap-2 rounded bg-transparent p-2 ">
         <View>
           <Text className="text-xl font-semibold">{search.query}</Text>
           <Text className="text-xl font-semibold">{dayjs(search.last_scraped_at).fromNow()}</Text>
@@ -175,22 +190,23 @@ const SearchResultScreen = () => {
             onPress={trackProducts}
             name={search.is_tracked ? 'bell-fill' : 'bell'}
             size={24}
-            color={'gold'}
+            color={APP_COLOR.MAIN_GREEN}
             className="mr-8"
           />
-          <Button title="Start scraping" onPressOut={startScraping} />
+          <AppButton label="Scrap Manually" onPressOut={startScraping} />
         </View>
       </View>
       <FlatList
         data={products}
         contentContainerClassName="gap-3 p-3 "
         keyExtractor={(item) => `${item.asin}`}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <Link href={`/product/${item.asin}`} asChild>
             <Pressable
               // onPress={() => !!item.url && Linking.openURL(item.url)}
 
-              className="flex-row gap-2 bg-white p-3">
+              className="flex-row gap-2 rounded-lg  bg-white p-3 shadow-sm">
               <Image
                 source={item.image ? { uri: item.image } : undefined}
                 className="cover  h-20 w-20"
@@ -198,12 +214,14 @@ const SearchResultScreen = () => {
               <Text className="flex-1" numberOfLines={4}>
                 {item.name}
               </Text>
-              <Text>${item.final_price.toFixed(2)}</Text>
+              <Text className="font-spaceg-medium text-APP_COLOR-MAIN_TEXT_DARK text-xl">
+                ${item.final_price.toFixed(2)}
+              </Text>
             </Pressable>
           </Link>
         )}
       />
-    </View>
+    </ImageBackground>
   );
 };
 

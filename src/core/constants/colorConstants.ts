@@ -1,0 +1,17 @@
+// Constants describing the App's Color
+export const APP_COLOR = {
+    MAIN_GREEN: "#0898A0",
+    MAIN_GREY_TEXT: '#71879C',
+    MAIN_GREY: '#71879C1A',
+    LIGHT_GREY: '#E1E8ED',
+    DARK_GREY: '#94A1AD',
+    MAIN_WHITE: '#FFF',
+    ACCENT_GREEN: "#0898A0",
+    MAIN_DARK: '#222222',
+    MAIN_RED: '#962626',
+    MAIN_ORANGE: "#FE7122",
+    MAIN_INDIGO: "#B80074",
+    MAIN_TEAL: "#0898A0",
+    PLACEHOLDER_DARK: '#292F33',
+    MAIN_TEXT_DARK: "#012224"
+};
